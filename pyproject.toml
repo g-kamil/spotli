@@ -1,0 +1,29 @@
+[project]
+name = "spotli"
+version = "0.1.0"
+description = "Simple Spotify API wrapper that can be used via Terminal"
+readme = "README.md"
+authors = [
+    { name = "po-prostu-kamil", email = "graczyk53@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "click>=8.1.7",
+    "python-dotenv>=1.0.1",
+    "requests>=2.32.3",
+]
+
+[project.scripts]
+spotli = "spotli.cli:cli"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "spotli",
+]
+
+[tool.uv.sources]
+spotli = { workspace = true }

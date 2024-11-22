@@ -13,7 +13,6 @@ import requests
 from . import TOKEN_PATH
 
 from .exceptions import AuthorizationError, MissingRequiredArgumentsError
-from .spotify_api import SpotifyAPI
 
 AUTH_URL = "https://accounts.spotify.com/authorize"
 TOKEN_URL = "https://accounts.spotify.com/api/token"

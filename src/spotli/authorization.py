@@ -4,14 +4,13 @@ import webbrowser
 from base64 import b64encode
 from datetime import datetime, timedelta
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import NoReturn, Union
+from typing import NoReturn
 from urllib.parse import parse_qs, urlencode, urlparse
 
 import click
 import requests
 
 from . import TOKEN_PATH
-
 from .exceptions import AuthorizationError, MissingRequiredArgumentsError
 
 AUTH_URL = "https://accounts.spotify.com/authorize"
@@ -50,7 +49,7 @@ class SpotifyAuth:
         with open(TOKEN_PATH, "w") as f:
             json.dump(tokens, f)
 
-    def _load_tokens(self) -> Union[dict, None]:
+    def _load_tokens(self) -> dict | None:
         if TOKEN_PATH.exists():
             with open(TOKEN_PATH, "r") as f:
                 return json.load(f)

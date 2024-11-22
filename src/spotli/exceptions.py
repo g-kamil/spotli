@@ -8,3 +8,6 @@ class AuthorizationError(SpotliBaseException):
 
 class MissingRequiredArgumentsError(SpotliBaseException):
     """"""
+
+class MissingApiTokenError(SpotliBaseException):
+    """"""

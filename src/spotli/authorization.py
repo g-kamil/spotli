@@ -69,29 +69,18 @@ class SpotifyAuth:
         response.raise_for_status()
         return response.json()
 
-    def _refresh_access_token(self, refresh_token: str) -> dict:
-        auth_header = b64encode(f"{self.client_id}:{self.client_secret}".encode()).decode()
-        headers = {"Authorization": f"Basic {auth_header}"}
-        data = {
-            "grant_type": "refresh_token",
-            "refresh_token": refresh_token,
-        }
-        response = requests.post(TOKEN_URL, headers=headers, data=data)
-        response.raise_for_status()
-        return response.json()
 
     def get_access_token(self) -> dict:
         click.echo("Checking for token existance...")
         tokens = self._load_tokens()
         if tokens:
 
-            click.echo("Token already exists, checking if need for refresh... ", nl=False)
+            click.echo("Token already exists, checking if need for refresh... ")
             # Refresh token if expired
             expires_at = datetime.strptime(tokens.get("expires_at")
                                            , "%Y-%m-%dT%H:%M:%S")
 
             if expires_at < datetime.now():
-                click.secho("refreshing token", fg="cyan")
                 self._check_arguments()
                 new_tokens = self._refresh_access_token(tokens["refresh_token"])
                 tokens.update(new_tokens)

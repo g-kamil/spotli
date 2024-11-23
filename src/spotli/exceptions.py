@@ -4,7 +4,7 @@ class BaseSpotliException(Exception):
     """Base Spotli Exception
     """
 
-class MissingApiTokenError(Exception):
+class MissingApiTokenError(BaseSpotliException):
     """When token has not been created
     """
 
@@ -13,6 +13,27 @@ class MissingApiTokenError(Exception):
 
     def __str__(self):
         return f"No token available at {TOKEN_PATH}. Request new with 'spotli auth'."
+
+class AuthorizationError(BaseSpotliException):
+    """When authorization failed
+    """
+
+    def __init__(self):
+        super().__init__()
+
+    def __str__(self):
+        return "Unsuccessful authorization attemp. Please try again."
+
+class MissingRequiredArgumentsError(BaseSpotliException):
+    """When required arugments where not passed"""
+
+    def __init__(self, missing_args: list[str]):
+        super().__init__()
+        self.missing_args = missing_args
+
+    def __str__(self):
+        return f"Missing one or more required arguments" \
+                + "".join(f"\n- {arg}" for arg in self.missing_args)
 
 class SpotliAPIException(BaseSpotliException):
     """General API call Exception

@@ -35,10 +35,12 @@ class SpotifyAPI:
             data=json.dumps(data) if data else None
         )
 
-
         match response.status_code:
             case 200:
-                return response.json()
+                try:
+                    return response.json()
+                except requests.exceptions.JSONDecodeError:
+                    return response.content
             case 201 | 202 | 204:
                 return None
             case 400:
@@ -56,25 +58,22 @@ class SpotifyAPI:
             case _:
                 raise SpotliAPIException(response.json())
 
-
-
-
-    def get(self, endpoint: str, params: dict = None):
+    def get(self, endpoint: str, data: dict = None, params: dict = None):
         """GET request to specified endpoint with given params
         """
-        return self._request("GET", endpoint, params=params)
+        return self._request("GET", endpoint, data=data, params=params)
 
-    def post(self, endpoint: str, data: dict):
+    def post(self, endpoint: str, data: dict = None, params: dict = None):
         """POST request to specified endpoint with given params
         """
-        return self._request("POST", endpoint, data=data)
+        return self._request("POST", endpoint, data=data, params=params)
 
-    def put(self, endpoint: str, data: dict):
+    def put(self, endpoint: str, data: dict = None, params: dict = None):
         """PUT request to specified endpoint with given params
         """
-        return self._request("PUT", endpoint, data=data)
+        return self._request("PUT", endpoint, data=data, params=params)
 
-    def delete(self, endpoint: str):
+    def delete(self, endpoint: str, data: dict = None, params: dict = None):
         """DELETE request to specified endpoint with given params
         """
-        return self._request("DELETE", endpoint)
+        return self._request("DELETE", endpoint, data=data, params=params)

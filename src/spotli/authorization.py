@@ -1,6 +1,4 @@
 import json
-import os
-import webbrowser
 from base64 import b64encode
 from datetime import datetime, timedelta
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -10,27 +8,25 @@ from urllib.parse import parse_qs, urlencode, urlparse
 import click
 import requests
 
-from . import TOKEN_PATH
+from .commons import TOKEN_PATH
 from .exceptions import AuthorizationError, MissingRequiredArgumentsError
 
 AUTH_URL = "https://accounts.spotify.com/authorize"
 TOKEN_URL = "https://accounts.spotify.com/api/token"
-SCOPES = ["user-read-private", "user-read-email"]
+SCOPES = ["user-read-private", "user-read-email", "user-read-playback-state"]
 
 class SpotifyAuth:
 
-    def __init__(self, client_id: str = None, client_secret: str = None, redirect_uri: str = None):
-
-
-        self.client_id = client_id or os.getenv("SPOTLI_CLIENT_ID")
-        self.client_secret = client_secret or os.getenv("SPOTLI_CLIENT_SECRET")
-        self.redirect_uri = redirect_uri or os.getenv("SPOTLI_REDIRECT_URI")
+    def __init__(self, client_id: str, client_secret: str, redirect_uri: str):
+        self.client_id = client_id
+        self.client_secret = client_secret
+        self.redirect_uri = redirect_uri
 
     def _check_arguments(self):
 
-        arg_dict = {'SPOTLI_CLIENT_ID' : self.client_id
-                   ,'SPOTLI_CLIENT_SECRET': self.client_secret
-                   ,'SPOTLI_REDIRECT_URI': self.redirect_uri}
+        arg_dict = {'client_id' : self.client_id
+                   ,'client_secret': self.client_secret
+                   ,'redirect_uri': self.redirect_uri}
 
         missing_args = [k for k, v in arg_dict.items() if not v]
 
@@ -114,7 +110,6 @@ class SpotifyAuth:
         }
         auth_url = f"{AUTH_URL}?{urlencode(auth_params)}"
         click.echo(f"Open this URL in your browser to authorize the app:\n{auth_url}")
-        webbrowser.open(auth_url)
 
         # Start a simple HTTP server to handle the callback
         class CallbackHandler(BaseHTTPRequestHandler):
@@ -138,7 +133,7 @@ class SpotifyAuth:
         code = server.code
 
         if not code:
-            raise AuthorizationError("Authorization failed. No code received.")
+            raise AuthorizationError()
 
         tokens = self._request_access_token(code)
         self._save_tokens(tokens)

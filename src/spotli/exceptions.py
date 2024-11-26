@@ -42,7 +42,7 @@ class SpotliAPIException(BaseSpotliException):
     def __init__(self, response: dict):
         super().__init__()
         self.status = response['error']['status']
-        self.response_message = response['error']['error_description']
+        self.response_message = response['error']['message']
 
     def __str__(self):
         return f"SpotliAPIException[{self.status}] - {self.response_message}"
@@ -51,8 +51,8 @@ class BadRequestError(SpotliAPIException):
     """Bad Request - The request could not be understood by the
     server due to malformed syntax.
     """
-    def __init__(self, status: str, response_message: str):
-        super().__init__(status, response_message)
+    def __init__(self, response: dict):
+        super().__init__(response)
         self.message = "Bad Request"
 
     def __str__(self):

@@ -3,6 +3,7 @@ from typing import Any
 
 from .commons import FromDictMixin
 
+
 @dataclass
 class Device(FromDictMixin):
     id: str

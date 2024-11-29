@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Simple Spotify API wrapper that can be used via Terminal"
 readme = "README.md"
 authors = [
-    { name = "po-prostu-kamil", email = "graczyk53@gmail.com" }
+    { name = "g-kamil", email = "graczyk53@gmail.com" }
 ]
 requires-python = ">=3.12"
 dependencies = [

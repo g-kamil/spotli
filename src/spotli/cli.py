@@ -71,93 +71,74 @@ def status(short):
     click.echo(result)
 
 @player.command()
-@click.option("--id", default=None, type=str, help="Targets current active session if no ID provided")
-def play(id: str):
-    """Starts playback; Targets current active session if no ID provided
+def play():
+    """Starts playback; Targets current active session
     """
     player = Player()
 
-    result = player.play(id)
+    result = player.play()
 
     click.echo(result)
 
 @player.command()
-@click.option("--id", default=None, type=str, help="Targets current active session if no ID provided")
-def pause(id):
-    """Pause playback; Targets current active session if no ID provided
+def pause():
+    """Pause playback; Targets current active session
     """
     player = Player()
 
-    result = player.pause(id)
+    result = player.pause()
 
     click.echo(result)
-
-@player.command()
-@click.option("--id", default=None, type=str, help="Targets current active session if no ID provided")
-def next():
-    """Pause playback; Targets current active session if no ID provided
-    """
-
-@player.command()
-@click.option("--id", default=None, type=str, help="Targets current active session if no ID provided")
-def previous():
-    """Pause playback; Targets current active session if no ID provided
-    """
 
 @player.command(context_settings={"ignore_unknown_options": True})
-@click.option("--id", default=None, type=str, help="Targets current active session if no ID provided")
 @click.argument("value", type=int, nargs=1)
-def volume(value, id):
+def volume(value):
     """Change volume of current active session to <VALUE>
     """
 
     player = Player()
 
-    result = player.volume(value, id)
+    result = player.volume(value)
 
     click.echo(result)
 
 @player.command()
-@click.option("--id", default=None, type=str, help="Targets current active session if no ID provided")
-def next(id):
+def next():
     """Skips to next track in the user's queue
     """
 
     player = Player()
 
-    result = player.next(id)
+    result = player.next()
 
     click.echo(result)
 
 @player.command()
-@click.option("--id", default=None, type=str, help="Targets current active session if no ID provided")
-def previous(id):
+def previous():
     """Skips to previous track in the user's queue
     """
 
     player = Player()
 
-    result = player.previous(id)
+    result = player.previous()
 
     click.echo(result)
 
 @player.command()
-@click.option("--id", default=None, type=str, help="Targets current active session if no ID provided")
 @click.argument("value", type=click.DateTime(formats=["%H:%M:%S", "%M:%S"]), nargs=1)
-def seek(value, id):
+def seek(value):
     """Seek to the given <VALUE> in the currently playing track; Format 00:00:00 or 00:00.
     """
 
     player = Player()
 
-    result = player.seek(value, id)
+    result = player.seek(value)
 
     click.echo(result)
 
 @player.command()
-@click.option("--id", default=None, type=str, help="Targets current active session if no ID provided")
 @click.argument("value", type=click.Choice(["track","context","off"], case_sensitive=False), nargs=1)
-def repeat(value, id):
+def repeat(value):
     """Set player to repeat mode\n
      `track` - repeat current track\n
      `context` - repeat current context (album, queue)\n
@@ -166,7 +147,7 @@ def repeat(value, id):
 
     player = Player()
 
-    result = player.repeat(value, id)
+    result = player.repeat(value)
 
     click.echo(result)
 
@@ -188,8 +169,7 @@ def devices():
     return result
 
 @player.command()
-@click.option("--id", default=None, type=str, help="Target device, to transfer the session")
-def transfer(id):
+def transfer():
     """Transfer playback to a new device and optionally begin playback
 
     If no target id is provided, displays list of possible targets
@@ -197,28 +177,26 @@ def transfer(id):
 
     player = Player()
 
-    if not id:
-        result = player.devices()
-        for device in result.values():
-            click.echo(device[1])
+    result = player.devices()
+    for device in result.values():
+        click.echo(device[1])
 
-        choice = click.prompt("Provide device number (n) or pass x to exit", type=int)
-        if not (id := result.get(choice, None)):
-            raise click.Abort()
+    choice = click.prompt("Provide device number (n) or pass x to exit", type=int)
+    if not (id := result.get(choice, None)):
+        raise click.Abort()
 
     result = player.transfer(id[0])
 
     click.echo(result)
 
 @player.command()
-@click.option("--id", default=None, type=str, help="Target device, to transfer the session")
-def shuffle(id):
+def shuffle():
     """Toggle shuffle on or off for user's playback
     """
 
     player = Player()
 
-    result = player.shuffle(id)
+    result = player.shuffle()
 
     click.echo(result)
 

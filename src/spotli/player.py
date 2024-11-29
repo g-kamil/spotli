@@ -238,19 +238,19 @@ class Player:
 
         self.player.skip_to_next(id)
 
-        return "Playing next song" + f" on device [{id[:5]}]" if id else ""
+        return "Playing next song" + (f" on device [{id[:5]}]" if id else "")
 
     def previous(self, id: str = None):
 
         self.player.skip_to_previous(id)
 
-        return "Playing previous song" + f" on device [{id[:5]}]" if id else ""
+        return "Playing previous song" + (f" on device [{id[:5]}]" if id else "")
 
     def volume(self, value: int, id: str = None):
 
         self.player.set_playback_volume(value, id)
 
-        return f"Setting volume to {value}%" + f" on device [{id[:5]}]" if id else ""
+        return f"Setting volume to {value}%" + (f" on device [{id[:5]}]" if id else "")
 
     def seek(self, time: datetime, id: str = None):
 

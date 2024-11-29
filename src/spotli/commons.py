@@ -1,6 +1,9 @@
 from dataclasses import fields, is_dataclass
 from pathlib import Path
+import re
 from typing import Any, Type, TypeVar, get_args, get_origin
+
+import click
 
 TOKEN_PATH = Path.home() / ".spotli" / "tokens.json"
 
@@ -8,11 +11,14 @@ T = TypeVar('T')
 
 class FromDictMixin:
     @classmethod
-    def from_dict(cls: Type[T], data: dict[str, Any]) -> T:
+    def from_dict(cls: Type[T], data: dict[str, Any]) -> T | None:
         """Creates class instance unpacking given dictionary"""
 
         field_names = {f.name for f in fields(cls)}
         init_kwargs = {}
+
+        if not data:
+            return None
 
         for key, value in data.items():
             if key in field_names:
@@ -36,3 +42,15 @@ class FromDictMixin:
                     init_kwargs[key] = value
 
         return cls(**init_kwargs)
+
+class SpotifyURI(click.ParamType):
+    """Custom type for validating Spotify URIs."""
+    name = "spotify_uri"
+
+    def __init__(self):
+        self.pattern = re.compile(r"^spotify:(track|album|artist|playlist|show|episode):[a-zA-Z0-9]+$")
+
+    def convert(self, value, param, ctx):
+        if isinstance(value, str) and self.pattern.match(value):
+            return value
+        self.fail(f"{value} is not a valid Spotify URI.", param, ctx)

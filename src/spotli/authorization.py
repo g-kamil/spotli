@@ -13,7 +13,7 @@ from .exceptions import AuthorizationError, MissingRequiredArgumentsError
 
 AUTH_URL = "https://accounts.spotify.com/authorize"
 TOKEN_URL = "https://accounts.spotify.com/api/token"
-SCOPES = ["user-read-private", "user-read-email", "user-read-playback-state"]
+SCOPES = ["user-read-private", "user-read-email", "user-read-playback-state", "user-read-recently-played"]
 
 class SpotifyAuth:
 

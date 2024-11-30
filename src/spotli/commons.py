@@ -7,7 +7,8 @@ import click
 
 TOKEN_PATH = Path.home() / ".spotli" / "tokens.json"
 
-T = TypeVar('T')
+T = TypeVar("T")
+
 
 class FromDictMixin:
     @classmethod
@@ -33,7 +34,9 @@ class FromDictMixin:
                 elif get_origin(field_type) is list:
                     inner_type = get_args(field_type)[0]
                     if is_dataclass(inner_type) and isinstance(value, list):
-                        init_kwargs[key] = [inner_type.from_dict(item) for item in value]
+                        init_kwargs[key] = [
+                            inner_type.from_dict(item) for item in value
+                        ]
                     else:
                         init_kwargs[key] = value  # List of primitives
 
@@ -43,12 +46,16 @@ class FromDictMixin:
 
         return cls(**init_kwargs)
 
+
 class SpotifyURI(click.ParamType):
     """Custom type for validating Spotify URIs."""
+
     name = "spotify_uri"
 
     def __init__(self):
-        self.pattern = re.compile(r"^spotify:(track|album|artist|playlist|show|episode):[a-zA-Z0-9]+$")
+        self.pattern = re.compile(
+            r"^spotify:(track|album|artist|playlist|show|episode):[a-zA-Z0-9]+$"
+        )
 
     def convert(self, value, param, ctx):
         if isinstance(value, str) and self.pattern.match(value):

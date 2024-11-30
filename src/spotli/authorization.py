@@ -13,34 +13,39 @@ from .exceptions import AuthorizationError, MissingRequiredArgumentsError
 
 AUTH_URL = "https://accounts.spotify.com/authorize"
 TOKEN_URL = "https://accounts.spotify.com/api/token"
-SCOPES = ["user-read-private", "user-read-email", "user-read-playback-state", "user-read-recently-played"]
+SCOPES = [
+    "user-read-private",
+    "user-read-email",
+    "user-read-playback-state",
+    "user-read-recently-played",
+]
+
 
 class SpotifyAuth:
-
     def __init__(self, client_id: str, client_secret: str, redirect_uri: str):
         self.client_id = client_id
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
 
     def _check_arguments(self):
-
-        arg_dict = {'client_id' : self.client_id
-                   ,'client_secret': self.client_secret
-                   ,'redirect_uri': self.redirect_uri}
+        arg_dict = {
+            "client_id": self.client_id,
+            "client_secret": self.client_secret,
+            "redirect_uri": self.redirect_uri,
+        }
 
         missing_args = [k for k, v in arg_dict.items() if not v]
 
         if missing_args:
             raise MissingRequiredArgumentsError(missing_args=missing_args)
 
-
     def _save_tokens(self, tokens: dict) -> NoReturn:
         TOKEN_PATH.parent.mkdir(parents=True, exist_ok=True)
 
         # add expires_at
-        tokens['expires_at'] = (datetime.now()
-                                + timedelta(seconds=tokens['expires_in'])) \
-                                    .strftime("%Y-%m-%dT%H:%M:%S")
+        tokens["expires_at"] = (
+            datetime.now() + timedelta(seconds=tokens["expires_in"])
+        ).strftime("%Y-%m-%dT%H:%M:%S")
 
         with open(TOKEN_PATH, "w") as f:
             json.dump(tokens, f)
@@ -52,7 +57,9 @@ class SpotifyAuth:
         return None
 
     def _request_access_token(self, code: dict) -> dict:
-        auth_header = b64encode(f"{self.client_id}:{self.client_secret}".encode()).decode()
+        auth_header = b64encode(
+            f"{self.client_id}:{self.client_secret}".encode()
+        ).decode()
         headers = {"Authorization": f"Basic {auth_header}"}
         data = {
             "grant_type": "authorization_code",
@@ -64,7 +71,9 @@ class SpotifyAuth:
         return response.json()
 
     def _refresh_access_token(self, refresh_token: str) -> dict:
-        auth_header = b64encode(f"{self.client_id}:{self.client_secret}".encode()).decode()
+        auth_header = b64encode(
+            f"{self.client_id}:{self.client_secret}".encode()
+        ).decode()
         headers = {"Authorization": f"Basic {auth_header}"}
         data = {
             "grant_type": "refresh_token",
@@ -74,16 +83,15 @@ class SpotifyAuth:
         response.raise_for_status()
         return response.json()
 
-
     def get_access_token(self) -> dict:
         click.echo("Checking for token existance...")
         tokens = self._load_tokens()
         if tokens:
-
             click.echo("Token already exists, checking if need for refresh... ")
             # Refresh token if expired
-            expires_at = datetime.strptime(tokens.get("expires_at")
-                                           , "%Y-%m-%dT%H:%M:%S")
+            expires_at = datetime.strptime(
+                tokens.get("expires_at"), "%Y-%m-%dT%H:%M:%S"
+            )
 
             if expires_at < datetime.now():
                 self._check_arguments()
@@ -113,7 +121,6 @@ class SpotifyAuth:
 
         # Start a simple HTTP server to handle the callback
         class CallbackHandler(BaseHTTPRequestHandler):
-
             def log_message(self, format, *args):
                 """skip sending server log messages"""
                 return

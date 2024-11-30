@@ -15,6 +15,7 @@ class Device(FromDictMixin):
     volume_percent: int
     supports_volume: bool
 
+
 @dataclass
 class Artist(FromDictMixin):
     external_urls: dict[str, str]
@@ -23,6 +24,7 @@ class Artist(FromDictMixin):
     name: str
     type: str
     uri: str
+
 
 @dataclass
 class Album(FromDictMixin):
@@ -37,6 +39,7 @@ class Album(FromDictMixin):
     uri: str
     artists: list[Artist]
 
+
 @dataclass
 class Track(FromDictMixin):
     album: Album
@@ -48,6 +51,7 @@ class Track(FromDictMixin):
     id: str
     name: str
     popularity: int
+
 
 @dataclass
 class PlaybackState(FromDictMixin):

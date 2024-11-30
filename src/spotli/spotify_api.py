@@ -2,10 +2,19 @@ import requests
 import json
 
 from .commons import TOKEN_PATH
-from .exceptions import *
+from .exceptions import (
+    BadRequestError,
+    UnauthorizedError,
+    ForbiddenError,
+    NotFoundError,
+    RateLimitError,
+    InternalServerError,
+    SpotliAPIException,
+    MissingApiTokenError,
+)
+
 
 class SpotifyAPI:
-
     BASE_URL = "https://api.spotify.com/v1"
 
     def __init__(self):
@@ -18,12 +27,13 @@ class SpotifyAPI:
     def _load_tokens(self) -> str | None:
         if TOKEN_PATH.exists():
             with open(TOKEN_PATH, "r") as f:
-                return json.load(f).get('access_token')
+                return json.load(f).get("access_token")
         raise MissingApiTokenError()
 
-    def _request(self, method: str, endpoint: str, params: dict = None, data: dict = None) -> dict | None:
-        """Basic request to the API
-        """
+    def _request(
+        self, method: str, endpoint: str, params: dict = None, data: dict = None
+    ) -> dict | None:
+        """Basic request to the API"""
 
         url = f"{self.BASE_URL}/{endpoint}"
 
@@ -32,7 +42,7 @@ class SpotifyAPI:
             url,
             headers=self.headers,
             params=params,
-            data=json.dumps(data) if data else None
+            data=json.dumps(data) if data else None,
         )
 
         match response.status_code:
@@ -59,21 +69,17 @@ class SpotifyAPI:
                 raise SpotliAPIException(response.json())
 
     def get(self, endpoint: str, data: dict = None, params: dict = None):
-        """GET request to specified endpoint with given params
-        """
+        """GET request to specified endpoint with given params"""
         return self._request("GET", endpoint, data=data, params=params)
 
     def post(self, endpoint: str, data: dict = None, params: dict = None):
-        """POST request to specified endpoint with given params
-        """
+        """POST request to specified endpoint with given params"""
         return self._request("POST", endpoint, data=data, params=params)
 
     def put(self, endpoint: str, data: dict = None, params: dict = None):
-        """PUT request to specified endpoint with given params
-        """
+        """PUT request to specified endpoint with given params"""
         return self._request("PUT", endpoint, data=data, params=params)
 
     def delete(self, endpoint: str, data: dict = None, params: dict = None):
-        """DELETE request to specified endpoint with given params
-        """
+        """DELETE request to specified endpoint with given params"""
         return self._request("DELETE", endpoint, data=data, params=params)

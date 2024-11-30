@@ -238,6 +238,17 @@ def queue(uri):
             starts += 5
             click.echo("\033[F\033[K"*7, nl=False) # clear last line
 
+@player.command()
+@click.option("--limit", default=10, type=click.IntRange(1, 50), help="Limit displayed songs")
+def recent(limit):
+    """Displays last -n songs for active session, default 10"""
+    player = Player()
+
+    result = player.recent(limit)
+
+    for song in result:
+        click.echo(f" \\/ {song}")
+
 cli.add_command(player)
 
 if __name__ == "__main__":

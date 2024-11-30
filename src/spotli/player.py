@@ -117,8 +117,16 @@ class PlayerApi:
 
         self.spotify_api.put(endpoint, params=params)
 
-    def get_recently_played_tracks(self):
-        ...
+    def get_recently_played_tracks(self, limit: int):
+
+        endpoint = self.endpoint + "/recently-played"
+
+        params = {"limit": limit,
+                 }
+
+        response = self.spotify_api.get(endpoint, params=params)
+
+        return [Track.from_dict(x.get("track")) for x in response.get("items")]
 
     def get_user_queue(self):
 
@@ -320,3 +328,16 @@ class Player:
         self.player.add_item_to_queue(uri, id)
 
         return f"Added {uri} to queue"
+
+    def recent(self, limit: int):
+
+        result = self.player.get_recently_played_tracks(limit)
+
+        songs = []
+
+        for track in result:
+            artists = " x ".join(artist.name for artist in track.artists)
+            song_name = track.name
+            songs += [f"{artists} - {song_name}"]
+
+        return songs

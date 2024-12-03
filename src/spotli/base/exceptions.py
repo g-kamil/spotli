@@ -1,4 +1,4 @@
-from .commons import TOKEN_PATH
+from .models import TOKEN_PATH
 
 
 class BaseSpotliException(Exception):

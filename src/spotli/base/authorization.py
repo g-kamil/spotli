@@ -8,7 +8,7 @@ from urllib.parse import parse_qs, urlencode, urlparse
 import click
 import requests
 
-from .commons import TOKEN_PATH
+from .models import TOKEN_PATH
 from .exceptions import AuthorizationError, MissingRequiredArgumentsError
 
 AUTH_URL = "https://accounts.spotify.com/authorize"
@@ -147,3 +147,27 @@ class SpotifyAuth:
         click.echo(f"Access Token created at: {TOKEN_PATH}")
 
         return tokens["access_token"]
+
+
+@click.command(context_settings={"auto_envvar_prefix": "SPOTLI"})
+@click.option("--redirect_uri", help="Overwrites SPOTLI_REDIRECT_URI", type=str)
+@click.option("--client_secret", help="Overwrites SPOTLI_CLIENT_SECRET", type=str)
+@click.option("--client_id", help="Overwrites SPOTLI_CLIENT_ID", type=str)
+def auth(client_id, client_secret, redirect_uri):
+    """Authenticate user using oAuth and create access token\n
+    prerequisition: Spotify App\n
+    (see: https://developer.spotify.com/documentation/web-api/concepts/apps)
+
+    You can pass your credentials to the the command directly or more convieniently
+    store them in environment variables
+    """
+    try:
+        SpotifyAuth(client_id, client_secret, redirect_uri).get_access_token()
+    except KeyboardInterrupt:
+        raise click.Abort()
+    except MissingRequiredArgumentsError as err:
+        click.echo("Missing required user credentials")
+        for cred in err.missing_args:
+            click.secho(f" - {cred}", fg="red")
+    except Exception as err:
+        raise err

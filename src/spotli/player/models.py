@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Any
 
-from .commons import FromDictMixin
+from ..base.models import FromDictMixin
 
 
 @dataclass

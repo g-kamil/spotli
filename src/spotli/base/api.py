@@ -1,7 +1,7 @@
 import requests
 import json
 
-from .commons import TOKEN_PATH
+from .models import TOKEN_PATH
 from .exceptions import (
     BadRequestError,
     UnauthorizedError,

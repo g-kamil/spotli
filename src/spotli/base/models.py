@@ -1,6 +1,6 @@
+import re
 from dataclasses import fields, is_dataclass
 from pathlib import Path
-import re
 from typing import Any, Type, TypeVar, get_args, get_origin
 
 import click

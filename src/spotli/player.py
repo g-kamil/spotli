@@ -13,6 +13,7 @@ class PlayerApi:
         self.endpoint = "me/player"
 
     def get_playback_state(self) -> PlaybackState | None:
+        """Get information about the user's current playback state"""
         endpoint = self.endpoint
 
         response = self.spotify_api.get(endpoint)
@@ -22,12 +23,16 @@ class PlayerApi:
 
         return None
 
-    def transfer_playback(self, id: str):
+    def transfer_playback(self, id: str) -> NoReturn:
+        """Transfer playback to a new device"""
+        endpoint = self.endpoint
+
         data = {"device_ids": [id], "play": False}
 
-        self.spotify_api.put(self.endpoint, data=data)
+        self.spotify_api.put(endpoint, data=data)
 
-    def get_available_devices(self):
+    def get_available_devices(self) -> list[Device] | None:
+        """Get information about a user's available Spotify Connect devices"""
         endpoint = self.endpoint + "/devices"
 
         response = self.spotify_api.get(endpoint)
@@ -37,31 +42,35 @@ class PlayerApi:
 
         return None
 
-    def get_currently_playing_track(self):
+    def get_currently_playing_track(self) -> NoReturn:
         raise NotImplementedError("Not implemented, use get_playback_state() instead")
 
     def start_resume_playback(self, id: str = None) -> NoReturn:
+        """Start a new context or resume current playback on the user's active device"""
         endpoint = self.endpoint + "/play"
 
         params = {"device_id": id}
 
         self.spotify_api.put(endpoint, params=params)
 
-    def pause_playback(self, id: str = None):
+    def pause_playback(self, id: str = None) -> NoReturn:
+        """Pause playback on the user's account"""
         endpoint = self.endpoint + "/pause"
 
         params = {"device_id": id}
 
         self.spotify_api.put(endpoint, params=params)
 
-    def skip_to_next(self, id: str = None):
+    def skip_to_next(self, id: str = None) -> NoReturn:
+        """Skips to next track in the user's queue"""
         endpoint = self.endpoint + "/next"
 
         params = {"devide_id": id}
 
         self.spotify_api.post(endpoint, params=params)
 
-    def skip_to_previous(self, id: str = None):
+    def skip_to_previous(self, id: str = None) -> NoReturn:
+        """Skips to previous track in the user's queue"""
         endpoint = self.endpoint + "/previous"
 
         params = {"devide_id": id}
@@ -69,13 +78,15 @@ class PlayerApi:
         self.spotify_api.post(endpoint, params=params)
 
     def seek_to_position(self, time: int, id: str = None) -> NoReturn:
+        """Seeks to the given position in the user's currently playing track"""
         endpoint = self.endpoint + "/seek"
 
         params = {"position_ms": time, "devide_id": id}
 
         self.spotify_api.put(endpoint, params=params)
 
-    def set_repeat_mode(self, value: str, id: str = None):
+    def set_repeat_mode(self, value: str, id: str = None) -> NoReturn:
+        """Set the repeat mode for the user's playback"""
         endpoint = self.endpoint + "/repeat"
 
         params = {"state": value, "device_id": id}
@@ -83,20 +94,23 @@ class PlayerApi:
         self.spotify_api.put(endpoint, params=params)
 
     def set_playback_volume(self, value: int, id: str = None) -> NoReturn:
+        """Set the volume for the user's current playback device"""
         endpoint = self.endpoint + "/volume"
 
         params = {"volume_percent": value, "device_id": id}
 
         self.spotify_api.put(endpoint, params=params)
 
-    def toggle_playback_shuffle(self, state: bool, id: str = None):
+    def toggle_playback_shuffle(self, state: bool, id: str = None) -> NoReturn:
+        """Toggle shuffle on or off for user's playback"""
         endpoint = self.endpoint + "/shuffle"
 
         params = {"state": state, "device_id": id}
 
         self.spotify_api.put(endpoint, params=params)
 
-    def get_recently_played_tracks(self, limit: int):
+    def get_recently_played_tracks(self, limit: int) -> list[Track] | None:
+        """Get tracks from the current user's recently played tracks"""
         endpoint = self.endpoint + "/recently-played"
 
         params = {
@@ -105,19 +119,24 @@ class PlayerApi:
 
         response = self.spotify_api.get(endpoint, params=params)
 
-        return [Track.from_dict(x.get("track")) for x in response.get("items")]
+        if response:
+            return [Track.from_dict(x.get("track")) for x in response.get("items")]
 
-    def get_user_queue(self):
+        return None
+
+    def get_user_queue(self) -> list[Track]:
+        """Get the list of objects that make up the user's queue"""
         endpoint = self.endpoint + "/queue"
 
         response = self.spotify_api.get(endpoint) or {}
 
         currently_playing = Track.from_dict(response.get("currently_playing"))
-        queue = [Track.from_dict(x) for x in response.get("queue")]
+        queue = [currently_playing] + [Track.from_dict(x) for x in response.get("queue")]
 
-        return (currently_playing, queue)
+        return queue
 
-    def add_item_to_queue(self, uri: SpotifyURI, id: str = None):
+    def add_item_to_queue(self, uri: SpotifyURI, id: str = None) -> NoReturn:
+        """Add an item to the end of the user's current playback queue"""
         endpoint = self.endpoint + "/queue"
 
         params = {"uri": uri, "id": id}
@@ -130,16 +149,41 @@ class Player:
         self.player = PlayerApi()
 
     def _to_ms(self, time: datetime) -> int:
+        """Parses a datetime object into milliseconds
+
+        Args:
+            time (datetime): datetime to parse
+
+        Returns:
+            int: numerical equivalent of the time in milliseconds
+        """
         seconds = time.hour * 60 * 60 + time.minute * 60 + time.second
         return seconds * 1000
 
     def _format_time(self, time_ms: int) -> str:
+        """Parses milliseconds into formated time string
+
+        Args:
+            time_ms (int): time in milliseconds to parse
+
+        Returns:
+            str: string in correct format
+        """
         seconds = time_ms // 1000
         minutes = seconds // 60
         seconds = seconds % 60
         return f"{minutes:02d}:{seconds:02d}"
 
     def _generate_progress_bar(self, duration_ms: int, progress_ms: int) -> str:
+        """Generates progress bar that is adjusted to the terminal width
+
+        Args:
+            duration_ms (int): length of the song in milliseconds
+            progress_ms (int): current song moment in milliseconds
+
+        Returns:
+            str: String representation of progress bar
+        """
         width: int = None
         fill: str = "█"
         empty: str = "-"
@@ -162,7 +206,12 @@ class Player:
 
         return f"[{bar}] {current_time} / {total_time}"
 
-    def status_short(self) -> str | None:
+    def status_short(self) -> str:
+        """Displays short description about current device state
+
+        Returns:
+            str: string with current device state
+        """
         if not (state := self.player.get_playback_state()):
             return "No active device found"
 
@@ -179,6 +228,11 @@ class Player:
         return f"{is_playing}  '{song_by_artist}' @ {device.name}[{device.id[:5]}] vol: {volume}%"
 
     def status(self) -> str:
+        """Displays long description about current device state
+
+        Returns:
+            str: multi-line string with comprehensive device state
+        """
         if not (state := self.player.get_playback_state()):
             return "No active device found"
 
@@ -204,6 +258,15 @@ class Player:
         )
 
     def play(self, id: str = None) -> str:
+        """Calls spotify api to start playback on given device.
+           If no id is given then targets current active device.
+
+        Args:
+            id (str, optional): device id to target while making api call. Defaults to None.
+
+        Returns:
+            str: current song
+        """
         self.player.start_resume_playback(id)
 
         result = "▶️" if not id else f"on [{id[:5]}] ▶️"
@@ -211,38 +274,103 @@ class Player:
         return result + self.status_short()[1:]
 
     def pause(self, id: str = None) -> str:
+        """Calls spotify api to pause playback on given device.
+           If no id is given then targets current active device.
+
+        Args:
+            id (str, optional): device id to target while making api call. Defaults to None.
+
+        Returns:
+            str: current song
+        """
         self.player.pause_playback(id)
 
         result = "⏸" if not id else f"on [{id[:5]}] ⏸"
 
         return result + self.status_short()[1:]
 
-    def next(self, id: str = None):
+    def next(self, id: str = None) -> str:
+        """Calls spotify api to start next song on given device.
+           If no id is given then targets current active device.
+
+        Args:
+            id (str, optional): device id to target while making api call. Defaults to None.
+
+        Returns:
+            str: Information about targeted device
+        """
         self.player.skip_to_next(id)
 
         return "Playing next song" + (f" on device [{id[:5]}]" if id else "")
 
     def previous(self, id: str = None):
+        """Calls spotify api to start previous song on given device.
+           If no id is given then targets current active device.
+
+        Args:
+            id (str, optional): device id to target while making api call. Defaults to None.
+
+        Returns:
+            str: Information about targeted device
+        """
         self.player.skip_to_previous(id)
 
         return "Playing previous song" + (f" on device [{id[:5]}]" if id else "")
 
-    def volume(self, value: int, id: str = None):
+    def volume(self, value: int, id: str = None) -> str:
+        """Set volume on given level.
+           If no id is given then targets current active device.
+
+        Args:
+            value (int): percentage level to which to set the volume of the device
+            id (str, optional): device id to target while making api call. Defaults to None.
+
+        Returns:
+            str: Information about new volume level
+        """
         self.player.set_playback_volume(value, id)
 
         return f"Setting volume to {value}%" + (f" on device [{id[:5]}]" if id else "")
 
-    def seek(self, time: datetime, id: str = None):
+    def seek(self, time: datetime, id: str = None) -> str:
+        """Seeks to the given position in the user's currently playing track.
+           If the specified time is outside the range of the song,
+           it will jump to the next one
+
+        Args:
+            time (datetime): time position to seek to
+            id (str, optional): device id to target while making api call. Defaults to None.
+
+        Returns:
+            str: Information about current song playing
+        """
         self.player.seek_to_position(self._to_ms(time), id)
 
         return self.status_short()
 
-    def repeat(self, value: str, id: str = None):
+    def repeat(self, value: str, id: str = None) -> str:
+        """Set the repeat mode for the user's playback
+        `track` - repeat current track
+        `context` - repeat current context (album, queue)
+        `off` - turns off repeat mode
+
+        Args:
+            value (str): repeat mode {track|context|off}
+            id (str, optional): device id to target while making api call. Defaults to None.
+
+        Returns:
+            str: Information about repeat state mode
+        """
         self.player.set_repeat_mode(value.lower(), id)
 
         return f"repeat mode set to: {value}"
 
     def devices(self) -> dict[int, tuple[str, str]]:
+        """Get information about a user's available Spotify Connect devices
+
+        Returns:
+            dict[int, tuple[str, str]]: dict[num : (device id, device description)]
+        """
         devices = {}
 
         for i, device in enumerate(self.player.get_available_devices(), start=1):
@@ -260,12 +388,28 @@ class Player:
 
         return devices
 
-    def transfer(self, id: str = None):
+    def transfer(self, id: str) -> str:
+        """Transfer playback to a new device
+
+        Args:
+            id (str, optional): device id to target while making api call. Defaults to None.
+
+        Returns:
+            str: Target device
+        """
         self.player.transfer_playback(id)
 
         return f"Transferring playback to {id[:5]}"
 
-    def shuffle(self, id: str = None):
+    def shuffle(self, id: str = None) -> str:
+        """Toggle shuffle on or off for user's playback
+
+        Args:
+            id (str, optional): device id to target while making api call. Defaults to None.
+
+        Returns:
+            str: Shuffle state set
+        """
         if not (state := self.player.get_playback_state()):
             return "No active device found"
 
@@ -275,29 +419,47 @@ class Player:
 
         return f"Setting shuffle state to {shuffle_state}"
 
-    def queue(self):
-        currently_playing, queue = self.player.get_user_queue()
+    def queue(self) -> list[str]:
+        """Get the list of objects that make up the user's queue
 
-        if not currently_playing and not queue:
+        Returns:
+            list[str]: List of tracks in queue
+        """
+        queue = self.player.get_user_queue()
+
+        if not queue:
             return None
 
-        artists = " x ".join(artist.name for artist in currently_playing.artists)
-        song_name = currently_playing.name
-        current = f"{artists} - {song_name}"
-
-        next = [
+        queue = [
             " x ".join(artist.name for artist in q.artists) + " - " + q.name
             for q in queue
         ]
 
-        return (current, next)
+        return queue
 
-    def add_queue(self, uri: SpotifyURI, id: str = None):
+    def add_queue(self, uri: SpotifyURI, id: str = None) -> str:
+        """Add an item to the end of the user's current playback queue
+
+        Args:
+            uri (SpotifyURI): Valid Spotify URI track
+            id (str, optional): device id to target while making api call. Defaults to None.
+
+        Returns:
+            str: Spotify URI of added song
+        """
         self.player.add_item_to_queue(uri, id)
 
         return f"Added {uri} to queue"
 
-    def recent(self, limit: int):
+    def recent(self, limit: int) -> list[str]:
+        """Get tracks from the current user's recently played tracks
+
+        Args:
+            limit (int): The maximum number of items to return
+
+        Returns:
+            list[str]: List of tracks
+        """
         result = self.player.get_recently_played_tracks(limit)
 
         songs = []

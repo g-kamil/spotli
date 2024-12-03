@@ -20,9 +20,9 @@ def cli(debug):
     internet access and active Spotify session on any device with your
     account connected.
 
-    Before you start, authenticate yourself with `spoticli auth`.
+    Before you start, authenticate yourself with `spotli auth`.
 
-    For wider traceback put --debug right after spotli command.
+    For detailed traceback put --debug right after `spotli` command.
     """
     if not debug:
         sys.tracebacklimit = 0
@@ -175,8 +175,6 @@ def devices():
     for device in result.values():
         click.echo(device[1])
 
-    return result
-
 
 @player.command()
 def transfer():
@@ -231,15 +229,16 @@ def queue(uri):
         click.echo(result)
         return
 
-    current, next = result
+    current = result[0]
+    queue = result[1:]
 
     click.echo(f"-> {current}")
 
     starts = 1
-    while next:
+    while queue:
         for idx, i in enumerate(range(5), start=starts):
             try:
-                click.echo(f" ({idx}) {next.pop(i)}")
+                click.echo(f" ({idx}) {queue.pop(i)}")
             except IndexError:
                 break
         else:

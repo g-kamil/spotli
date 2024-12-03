@@ -57,7 +57,7 @@ class SpotifyURI(click.ParamType):
             r"^spotify:(track|album|artist|playlist|show|episode):[a-zA-Z0-9]+$"
         )
 
-    def convert(self, value, param, ctx):
+    def convert(self, value, param, ctx) -> str:
         if isinstance(value, str) and self.pattern.match(value):
             return value
         self.fail(f"{value} is not a valid Spotify URI.", param, ctx)

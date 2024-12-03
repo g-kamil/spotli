@@ -68,18 +68,18 @@ class SpotifyAPI:
             case _:
                 raise SpotliAPIException(response.json())
 
-    def get(self, endpoint: str, data: dict = None, params: dict = None):
+    def get(self, endpoint: str, data: dict = None, params: dict = None) -> dict | None:
         """GET request to specified endpoint with given params"""
         return self._request("GET", endpoint, data=data, params=params)
 
-    def post(self, endpoint: str, data: dict = None, params: dict = None):
+    def post(self, endpoint: str, data: dict = None, params: dict = None) -> dict | None:
         """POST request to specified endpoint with given params"""
         return self._request("POST", endpoint, data=data, params=params)
 
-    def put(self, endpoint: str, data: dict = None, params: dict = None):
+    def put(self, endpoint: str, data: dict = None, params: dict = None) -> dict | None:
         """PUT request to specified endpoint with given params"""
         return self._request("PUT", endpoint, data=data, params=params)
 
-    def delete(self, endpoint: str, data: dict = None, params: dict = None):
+    def delete(self, endpoint: str, data: dict = None, params: dict = None) -> dict | None:
         """DELETE request to specified endpoint with given params"""
         return self._request("DELETE", endpoint, data=data, params=params)
